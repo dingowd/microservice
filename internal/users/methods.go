@@ -13,6 +13,7 @@ import (
 
 type DB structures.DB
 
+//function to create user in mongo DB by json
 func (d DB) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
@@ -41,6 +42,7 @@ func (d DB) Create(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
+//function to delete user in mongo DB by json
 func (d DB) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
@@ -67,11 +69,15 @@ func (d DB) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
+//function to display all users in mongo DB
 func (d DB) GetAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		query := bson.M{}
 		users := []structures.User{}
-		d.Collection.Find(query).All(&users)
+		if err := d.Collection.Find(query).All(&users); err != nil {
+			fmt.Fprint(w, err)
+			return
+		}
 		for _, u := range users {
 			fmt.Fprint(w, u, "\n")
 		}
@@ -81,6 +87,7 @@ func (d DB) GetAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t GET")
 }
 
+//function to make friends from user1 and user2 in mongo DB by json
 func (d DB) MakeFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
@@ -146,6 +153,7 @@ func (d DB) MakeFriends(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
+//function to display user's friends by json
 func (d DB) GetFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
@@ -178,6 +186,7 @@ func (d DB) GetFriends(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
+//function to set new user age in mongo DB by json
 func (d DB) NewAge(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)

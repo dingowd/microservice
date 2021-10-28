@@ -14,12 +14,9 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt)
 	go func() {
-		for {
-			select {
-			case <-stopChan:
-				fmt.Println("Микросервис 2 завершает работу")
-				os.Exit(0)
-			}
+		for range stopChan {
+			fmt.Println("Микросервис 2 завершает работу")
+			os.Exit(0)
 		}
 	}()
 	u := new(users.DB)

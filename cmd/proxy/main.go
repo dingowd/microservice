@@ -86,12 +86,9 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt)
 	go func() {
-		for {
-			select {
-			case <-stopChan:
-				fmt.Println("Прокси завершает работу")
-				os.Exit(0)
-			}
+		for range stopChan {
+			fmt.Println("Прокси завершает работу")
+			os.Exit(0)
 		}
 	}()
 	http.HandleFunc("/getall", GetAll)
