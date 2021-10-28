@@ -1,0 +1,28 @@
+//to create user
+method: "POST"
+127.0.0.1:9000/create
+{"name":"Alex","age":25,"friends":[]}
+
+//to print all users
+method: "GET"
+127.0.0.1:9000/getall
+
+//to make friends
+method: "POST"
+127.0.0.1:9000/make_friends
+{"us1":"ObjectIdHex","us2":"ObjectIdHex"}
+
+//to delete user
+method: "POST"
+127.0.0.1:9000/delete
+{"target_id":"ObjectIdHex"}
+
+//to set new age
+method: "POST"
+127.0.0.1:9000/newage
+{"id":"ObjectIdHex","age":40}
+
+//to get friends of user
+method: "POST"
+127.0.0.1:9000/friends
+{"target_id":"ObjectIdHex"}
