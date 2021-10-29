@@ -11,11 +11,12 @@ import (
 )
 
 func main() {
+	args := os.Args[1:]
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt)
 	go func() {
 		for range stopChan {
-			fmt.Println("Микросервис 1 завершает работу")
+			fmt.Println("Микросервис", args[1], "завершает работу")
 			os.Exit(0)
 		}
 	}()
@@ -32,7 +33,7 @@ func main() {
 	http.HandleFunc("/delete", u.DeleteUser)
 	http.HandleFunc("/friends", u.GetFriends)
 	http.HandleFunc("/newage", u.NewAge)
-	if err := http.ListenAndServe("localhost:8080", nil); err != nil {
+	if err := http.ListenAndServe(args[0], nil); err != nil {
 		fmt.Println(err.Error())
 	}
 }
