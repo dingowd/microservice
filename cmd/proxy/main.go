@@ -2,11 +2,15 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
+	"time"
 )
 
 var count bool = false
@@ -83,21 +87,38 @@ func NewAge(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, os.Interrupt)
+	//initial
+	server := &http.Server{Addr: "localhost:9000", Handler: nil}
+	//Graceful shutdown
+	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
-		for range stopChan {
-			fmt.Println("Прокси завершает работу")
-			os.Exit(0)
+		<-sig
+		// Shutdown signal with grace period of 30 seconds
+		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		go func() {
+			<-shutdownCtx.Done()
+			if shutdownCtx.Err() == context.DeadlineExceeded {
+				log.Fatal("graceful shutdown timed out.. forcing exit.")
+			}
+		}()
+		// Trigger graceful shutdown
+		err := server.Shutdown(shutdownCtx)
+		if err != nil {
+			log.Fatal(err)
 		}
+		serverStopCtx()
 	}()
+	//request processing
 	http.HandleFunc("/getall", GetAll)
 	http.HandleFunc("/create", Create)
 	http.HandleFunc("/make_friends", MakeFriends)
 	http.HandleFunc("/delete", DeleteUser)
 	http.HandleFunc("/friends", GetFriends)
 	http.HandleFunc("/newage", NewAge)
-	if err := http.ListenAndServe("localhost:9000", nil); err != nil {
+	//start http server
+	if err := server.ListenAndServe(); err != nil {
 		fmt.Println(err.Error())
 	}
 }
