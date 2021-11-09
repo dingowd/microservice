@@ -66,6 +66,7 @@ func GetURL(url string) string {
 	count = !count
 	return firstservice + url
 }
+
 func Create(w http.ResponseWriter, r *http.Request) {
 	post(w, r, GetURL("/create"))
 }
@@ -95,7 +96,7 @@ func main() {
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		<-sig
-		// Shutdown signal with grace period of 30 seconds
+		//Shutdown signal with grace period of 30 seconds
 		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
 		go func() {
 			<-shutdownCtx.Done()
