@@ -5,16 +5,36 @@ import (
 	"fmt"
 	"github.com/dingowd/microservice/db/mongo"
 	"github.com/dingowd/microservice/structures"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 )
 
-type DB structures.DB
+//type DB structures.DB
 
-//function to create user in mongo DB by json
-func (d DB) Create(w http.ResponseWriter, r *http.Request) {
+type MongoDB struct {
+	Collection *mgo.Collection
+	Session    *mgo.Session
+}
+
+func (d *MongoDB) Init() {
+	var err error
+	d.Session, err = mgo.Dial("mongodb://127.0.0.1")
+	if err != nil {
+		log.Fatal(err)
+	}
+	d.Collection = d.Session.DB("users").C("users")
+}
+
+func (d *MongoDB) Close() {
+	d.Session.Close()
+}
+
+// Function to create user in mongo DB by json
+func (d *MongoDB) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -42,8 +62,8 @@ func (d DB) Create(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
-//function to delete user in mongo DB by json
-func (d DB) DeleteUser(w http.ResponseWriter, r *http.Request) {
+// Function to delete user in mongo DB by json
+func (d *MongoDB) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -69,8 +89,8 @@ func (d DB) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
-//function to display all users in mongo DB
-func (d DB) GetAll(w http.ResponseWriter, r *http.Request) {
+// Function to display all users in mongo DB
+func (d *MongoDB) GetAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		query := bson.M{}
 		users := []structures.User{}
@@ -87,8 +107,8 @@ func (d DB) GetAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t GET")
 }
 
-//function to make friends from user1 and user2 in mongo DB by json
-func (d DB) MakeFriends(w http.ResponseWriter, r *http.Request) {
+// Function to make friends from user1 and user2 in mongo DB by json
+func (d *MongoDB) MakeFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -153,8 +173,8 @@ func (d DB) MakeFriends(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
-//function to display user's friends by json
-func (d DB) GetFriends(w http.ResponseWriter, r *http.Request) {
+// Function to display user's friends by json
+func (d *MongoDB) GetFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -186,8 +206,8 @@ func (d DB) GetFriends(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Method isn`t POST")
 }
 
-//function to set new user age in mongo DB by json
-func (d DB) NewAge(w http.ResponseWriter, r *http.Request) {
+// Function to set new user age in mongo DB by json
+func (d *MongoDB) NewAge(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content, err := ioutil.ReadAll(r.Body)
 		if err != nil {

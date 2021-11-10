@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/dingowd/microservice/internal/users"
-	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"os"
@@ -39,13 +38,10 @@ func main() {
 		serverStopCtx()
 	}()
 	//Connect to mongodb
-	u := new(users.DB)
-	session, err := mgo.Dial("mongodb://127.0.0.1")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
-	u.Collection = session.DB("users").C("users")
+	m := new(users.MongoDB)
+	u := users.DataBase(m)
+	u.Init()
+	defer u.Close()
 	//request processing
 	http.HandleFunc("/getall", u.GetAll)
 	http.HandleFunc("/create", u.Create)
